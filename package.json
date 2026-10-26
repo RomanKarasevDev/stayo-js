@@ -1,0 +1,58 @@
+{
+  "name": "@stayo/sdk",
+  "version": "0.1.0",
+  "description": "Stayo client for browsers, Node.js and per-request SSR, without Supabase dependencies",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md",
+    "docs",
+    "examples",
+    "SOURCE.json"
+  ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=22"
+  },
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "npm run build && npm run test:types && node --test tests/*.test.mjs",
+    "test:types": "tsc --noEmit --strict --target ES2022 --module NodeNext --moduleResolution NodeNext --lib ES2022,DOM tests/auth-code-types.mts",
+    "pack:smoke": "node scripts/pack-smoke.mjs",
+    "prepack": "npm run build"
+  },
+  "devDependencies": {
+    "typescript": "5.7.2"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "stayo",
+    "typescript",
+    "auth",
+    "database",
+    "storage",
+    "realtime"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RomanKarasevDev/stayo-js.git"
+  },
+  "homepage": "https://github.com/RomanKarasevDev/stayo-js#readme",
+  "bugs": {
+    "url": "https://github.com/RomanKarasevDev/stayo-js/issues"
+  }
+}

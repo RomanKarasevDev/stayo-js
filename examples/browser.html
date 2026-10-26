@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Stayo notes example</title>
+<style>body{max-width:42rem;margin:3rem auto;padding:0 1rem;font:16px system-ui;color:#292721;background:#faf8f3}form{display:grid;gap:.7rem;margin:1rem 0}input,button{font:inherit;padding:.7rem;border:1px solid #bbb5aa;border-radius:.3rem}button{cursor:pointer;background:#efebe2}pre{white-space:pre-wrap}h1{font-size:1.7rem}</style>
+<h1>Stayo notes</h1><p>Use your project URL and public key. Run schema.sql once in a disposable project before signing in.</p>
+<form id="connect"><input id="url" type="url" required placeholder="https://project.example.com"><input id="public-key" required placeholder="Public project key"><button>Connect</button></form>
+<form id="login" hidden><input id="email" type="email" required placeholder="Email"><input id="password" type="password" autocomplete="current-password" required placeholder="Password"><button>Sign in</button></form>
+<form id="note" hidden><input id="title" required placeholder="New note"><button>Add note</button></form><button id="logout" hidden>Sign out</button><p id="status" role="status"></p><ul id="notes"></ul>
+<script type="module">
+import {createClient} from '../dist/index.js'
+const el = id => document.getElementById(id)
+let client, subscription
+const status = text => { el('status').textContent = text }
+async function reload() {
+  const {data} = await client.from('notes').select('id,title').order('id').execute()
+  el('notes').replaceChildren(...data.map(note => {const li=document.createElement('li');li.textContent=note.title;return li}))
+}
+function signedIn(yes) { el('login').hidden=yes;el('note').hidden=!yes;el('logout').hidden=!yes;if(!yes)el('notes').replaceChildren() }
+function report(error) {status(error.code ? `${error.code} (${error.status})` : 'Operation failed')}
+el('connect').onsubmit = async event => {event.preventDefault();try {client?.dispose();client=createClient({url:el('url').value,publicKey:el('public-key').value});client.auth.onAuthStateChange(event=>{if(event==='SIGNED_OUT')signedIn(false)});const session=await client.auth.getSession();signedIn(!!session);if(session)await reload();status('Connected')}catch(e){report(e)}}
+el('login').onsubmit = async event => {event.preventDefault();try {await client.auth.signInWithPassword({email:el('email').value,password:el('password').value});el('password').value='';signedIn(true);await reload();subscription?.unsubscribe();subscription=client.realtime.subscribe({table:'notes',onChange:()=>void reload().catch(report),onStatus:value=>{if(value==='resync-required')void reload().catch(report)}});status('Signed in')}catch(e){report(e)}}
+el('note').onsubmit = async event => {event.preventDefault();try {const user=await client.auth.getUser();await client.from('notes').insert({title:el('title').value,owner_id:user.id}).execute();el('title').value='';await reload()}catch(e){report(e)}}
+el('logout').onclick = () => {void client.auth.signOut().catch(report)}
+addEventListener('pagehide',()=>client?.dispose())
+</script></html>

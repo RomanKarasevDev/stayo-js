@@ -1,0 +1,10 @@
+export {StayoClient,createClient} from './client.js';
+export {StayoAuth} from './auth.js';
+export type {AuthEvent,EmailVerificationType,VerifyOtpInput} from './auth.js';
+export {Database,Query} from './query.js';
+export type {QueryResult,FilterOperator} from './query.js';
+export {StayoStorage,StorageBucket} from './storage.js';
+export {StayoRealtime,RealtimeSubscription} from './realtime.js';
+export type {PostgresChange,RealtimeStatus,SubscribeOptions} from './realtime.js';
+export {MemoryStorage,StayoError} from './types.js';
+export type {ClientOptions,StorageAdapter,Session,User,RequestOptions,Capabilities} from './types.js';
